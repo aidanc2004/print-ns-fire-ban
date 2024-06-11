@@ -9,9 +9,15 @@ import math
 import win32api
 import win32print
 import schedule
+import datetime
 from selenium import webdriver
 from PIL import Image
 from io import BytesIO
+
+# Print with date and time
+def log(msg):
+  dt = datetime.datetime.now().strftime("[%Y-%m-%d, %H:%M:%S]")
+  print(f"{dt} {msg}")
 
 # Set the Firefox window size to get all content on the page
 def set_window_size(driver):
@@ -38,26 +44,27 @@ def crop_img(driver, img, size):
 
   return img
 
+# Take a screenshot of the fire ban website
 def fireban_png(file):
-  url = "https://novascotia.ca/burnsafe/"
-  
   # Start Firefox in headless mode
   options = webdriver.firefox.options.Options()
   options.add_argument("--headless")
   driver = webdriver.Firefox(options=options)
   
   # Open website
+  url = "https://novascotia.ca/burnsafe/"
   try:
     driver.get(url)
   except:
-    print(f"Couldn't get {url}")
+    log(f"Couldn't get {url}.")
     return -1
 
   # Page might not have loaded fast enough
+  id_name = "burn-data-content"
   try:
-    page = driver.find_element("id", "burn-data-content")
+    page = driver.find_element("id", id_name)
   except:
-    print("Couldn't find burn-data-content")
+    log(f"Couldn't find {id_name}.")
     return -1
   
   set_window_size(driver) # Set Firefox size
@@ -75,6 +82,7 @@ def fireban_png(file):
   # Paste image into the middle of the paper
   img_width, img_height = img.size
   new_width = 1240
+  # Maintain aspect ratio
   new_height = math.floor(new_width * img_width / img_height)
 
   img = img.resize((new_width, new_height), Image.LANCZOS)
@@ -91,17 +99,17 @@ def print_fireban():
   err = fireban_png(file)
   if (err < 0):
     return
-  print(f"Saved to {file}")
   
   # Print PDF to printer (Windows specific)
   printer_name = "Brother MFC-L2740DW series Printer"
   err = win32api.ShellExecute(0, "printto", file, f'"{printer_name}"', ".", 0)
   if (err <= 32):
-    print(f"Failed to print to f{printer_name}")
+    log(f"Failed to print to f{printer_name}.")
     return
-  print(f"Printing to {printer_name}")
+  log(f"Printing to {printer_name}.")
 
 # Run print_fireban everyday at 2pm
+log("Started fire ban printing script.")
 schedule.every().day.at("14:00").do(print_fireban)
 while True:
   schedule.run_pending()
