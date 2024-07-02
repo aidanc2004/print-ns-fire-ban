@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Download the current nova scotia fire ban at 2pm everyday
-# Aidan Carey, June 8th 2024
+# Aidan Carey, June 8th - July 2nd, 2024
 
 import os
 import time
@@ -17,7 +17,15 @@ from io import BytesIO
 # Print with date and time
 def log(msg):
   dt = datetime.datetime.now().strftime("[%Y-%m-%d, %H:%M:%S]")
-  print(f"{dt} {msg}")
+  dt_msg = f"{dt} {msg}"
+  
+  # Log to STDOUT
+  print(dt_msg)
+  
+  # Log to file
+  log_file = open("log.txt", "a")
+  log_file.write(dt_msg + "\n")
+  log_file.close()
 
 # Set the Firefox window size to get all content on the page
 def set_window_size(driver):
