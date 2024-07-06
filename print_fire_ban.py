@@ -123,6 +123,6 @@ while True:
   # Wait until the next time we need to run it
   t = schedule.idle_seconds()
   if t > 0:
-    time.sleep(time_until_next)
+    time.sleep(t)
   # Get and print ban
   schedule.run_pending()
