@@ -10,14 +10,46 @@ import win32api
 import win32print
 import schedule
 import datetime
+import threading
 from selenium import webdriver
-from PIL import Image
+import PIL.Image
 from io import BytesIO
+
+# GUI
+from tkinter import *
+from tkinter import ttk
+from tkinter import scrolledtext
+from tkinter import messagebox
+
+window = Tk()
+window.title("Print Fire Ban")
+window.iconbitmap("icon.ico")
+
+frame = ttk.Frame(window, padding=5)
+frame.grid()
+
+logs = scrolledtext.ScrolledText(frame, width=60, height=16, state=DISABLED)
+logs.grid(column=1, rowspan=100, padx=(5,0))
+
+# TODO: Implement toggling script
+ttk.Label(frame, text="Toggle Script:").grid(row=3)
+ttk.Button(frame, text="NOT IMPL", command=None).grid(row=4)
+
+# About button
+def about():
+    messagebox.showinfo("About", "Aidan Carey 2024")
+ttk.Button(frame, text="i", command=about, width=2).grid(row=99)
+
 
 # Print with date and time
 def log(msg):
   dt = datetime.datetime.now().strftime("[%Y-%m-%d, %H:%M:%S]")
   dt_msg = f"{dt} {msg}"
+  
+  # Log to GUI
+  logs.config(state=NORMAL)
+  logs.insert(INSERT, dt_msg + "\n")
+  logs.config(state=DISABLED)
   
   # Log to STDOUT
   print(dt_msg)
@@ -79,13 +111,13 @@ def fireban_png(file):
 
   # Get PNG of website and crop to only needed information
   png = driver.get_screenshot_as_png()
-  img = Image.open(BytesIO(png))
+  img = PIL.Image.open(BytesIO(png))
   img = crop_img(driver, img, page.size)
 
   driver.quit() # Exit Firefox
   
   # New image for printer paper (A4 at 150dpi)
-  paper = Image.new(mode="RGB", size=(1240, 1754), color=(255, 255, 255))
+  paper = PIL.Image.new(mode="RGB", size=(1240, 1754), color=(255, 255, 255))
 
   # Paste image into the middle of the paper
   img_width, img_height = img.size
@@ -93,7 +125,7 @@ def fireban_png(file):
   # Maintain aspect ratio
   new_height = math.floor(new_width * img_width / img_height)
 
-  img = img.resize((new_width, new_height), Image.LANCZOS)
+  img = img.resize((new_width, new_height), PIL.Image.LANCZOS)
   paper.paste(img, (0, (math.floor(1754/2)) - (math.floor(new_height/2))))
   
   paper.save(file)
@@ -116,13 +148,29 @@ def print_fireban():
     return
   log(f"Printing to {printer_name}.")
 
+# Call print_fireban from a thread for use with ttk.Button
+def print_fireban_threading():
+    threading.Thread(target=print_fireban).start()
+
+ttk.Label(frame, text="Immediately Print:").grid(row=0)
+ttk.Button(frame, text="Print", command=print_fireban_threading).grid(row=1)
+
 # Run print_fireban everyday at 2pm
-log("Started fire ban printing script.")
-schedule.every().day.at("14:00").do(print_fireban)
-while True:
-  # Wait until the next time we need to run it
-  t = schedule.idle_seconds()
-  if t > 0:
-    time.sleep(t)
-  # Get and print ban
-  schedule.run_pending()
+def start_fire_ban():
+  log("Started fire ban printing script.")
+  schedule.every().day.at("14:00").do(print_fireban)
+  while True:
+    # Wait until the next time we need to run it
+    t = schedule.idle_seconds()
+    if t > 0:
+      time.sleep(t)
+    # Get and print ban
+    schedule.run_pending()
+
+# Start fire ban printing thread
+print_thread = threading.Thread(target=start_fire_ban)
+print_thread.daemon = True # Close on exit
+print_thread.start()
+
+# Start GUI main loop
+window.mainloop()
