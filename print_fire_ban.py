@@ -3,6 +3,13 @@
 # Download the current nova scotia fire ban at 2pm everyday
 # Aidan Carey, June 8th - July 2nd, 2024
 
+# TODO:
+# - Add help information (Simple help information)
+# - Add README (For more technical information)
+# - Add printer selection
+# - Scale GUI with window
+# - Have script toggle state saved between sessions
+
 import os
 import time
 import math
@@ -36,9 +43,31 @@ logs.grid(column=1, rowspan=100, padx=(5,0))
 
 def about():
     messagebox.showinfo("About", "Aidan Carey 2024")
-ttk.Button(frame, text="i", command=about, width=2).grid(row=99)
+ttk.Button(frame, text="About", command=about).grid(row=99)
 
-### Toggle on or off script (Only this session) ###
+### Help button ###
+
+# Open the help window
+def open_help():
+  # Open new window and configure it
+  help_window = Toplevel()
+  help_window.title("Help")
+  help_window.iconbitmap("icon.ico")
+  help_window.focus()
+  help_window.geometry("500x400")
+  
+  # Where the help information is shown
+  help_text = scrolledtext.ScrolledText(help_window, width=60, height=24)
+  # Load help information from file
+  with open("help.txt", "r") as help_file:
+    help_text.insert(INSERT, help_file.read())
+  # Disable typing    
+  help_text.config(state=DISABLED)
+  help_text.pack()
+
+ttk.Button(frame, text="Help", command=open_help).grid(row=98)
+
+### Toggle on or off script ###
 
 running = True # If the script is running
 
