@@ -24,6 +24,7 @@ from tkinter import messagebox
 window = Tk()
 window.title("Print Fire Ban")
 window.iconbitmap("icon.ico")
+window.wm_state("iconic") # Open minimized
 
 frame = ttk.Frame(window, padding=5)
 frame.grid()
@@ -31,15 +32,36 @@ frame.grid()
 logs = scrolledtext.ScrolledText(frame, width=60, height=16, state=DISABLED)
 logs.grid(column=1, rowspan=100, padx=(5,0))
 
-# TODO: Implement toggling script
-ttk.Label(frame, text="Toggle Script:").grid(row=3)
-ttk.Button(frame, text="NOT IMPL", command=None).grid(row=4)
+### About button ###
 
-# About button
 def about():
     messagebox.showinfo("About", "Aidan Carey 2024")
 ttk.Button(frame, text="i", command=about, width=2).grid(row=99)
 
+### Toggle on or off script (Only this session) ###
+
+running = True # If the script is running
+
+ttk.Label(frame, text="Toggle Script:").grid(row=3)
+running_button = ttk.Button(frame)
+running_button.grid(row=4)
+
+# Convert bool to "On" or "Off" string
+def bool_to_on_off(state):
+  if state:
+    return "On"
+  return "Off"
+
+# Toggle running and update button text
+def toggle_running():
+  global running
+  running = not running
+  running_button.config(text=bool_to_on_off(running))
+
+running_button.config(text=bool_to_on_off(running))
+running_button.config(command=toggle_running)
+
+### Main Script ###
 
 # Print with date and time
 def log(msg):
@@ -134,6 +156,13 @@ def fireban_png(file):
 
 # Get the fire ban and print it to the default printer
 def print_fireban():
+  # Don't print if script isn't running
+  # TODO: Also doesn't print when trying to print immediately
+  global running
+  if not running:
+    log("Script off, not printing.")
+    return
+
   # Save NS fire ban website as a png
   file = "fireban.png"
   err = fireban_png(file)
