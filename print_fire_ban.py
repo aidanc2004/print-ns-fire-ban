@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 
 # Download the current nova scotia fire ban at 2pm everyday
-# Aidan Carey, June 8th - July 2nd, 2024
+# Aidan Carey, June 8th - August 20st, 2024
 
 # TODO:
-# - Add help information (Simple help information)
-# - Add README (For more technical information)
-# - Add printer selection
-# - Scale GUI with window
-# - Have script toggle state saved between sessions
+# - Use last selected printer
 
 import os
 import time
@@ -22,7 +18,7 @@ from selenium import webdriver
 import PIL.Image
 from io import BytesIO
 
-# GUI
+# GUI imports
 from tkinter import *
 from tkinter import ttk
 from tkinter import scrolledtext
@@ -32,11 +28,12 @@ window = Tk()
 window.title("Print Fire Ban")
 window.iconbitmap("icon.ico")
 window.wm_state("iconic") # Open minimized
+window.resizable(False, False)
 
 frame = ttk.Frame(window, padding=5)
 frame.grid()
 
-logs = scrolledtext.ScrolledText(frame, width=60, height=16, state=DISABLED)
+logs = scrolledtext.ScrolledText(frame, width=70, height=16, state=DISABLED, wrap=WORD)
 logs.grid(column=1, rowspan=100, padx=(5,0))
 
 ### About button ###
@@ -55,9 +52,10 @@ def open_help():
   help_window.iconbitmap("icon.ico")
   help_window.focus()
   help_window.geometry("500x400")
+  help_window.resizable(False, False)
   
   # Where the help information is shown
-  help_text = scrolledtext.ScrolledText(help_window, width=60, height=24)
+  help_text = scrolledtext.ScrolledText(help_window, width=60, height=24, wrap=WORD)
   # Load help information from file
   with open("help.txt", "r") as help_file:
     help_text.insert(INSERT, help_file.read())
@@ -67,28 +65,41 @@ def open_help():
 
 ttk.Button(frame, text="Help", command=open_help).grid(row=98)
 
-### Toggle on or off script ###
+### Choose printer ###
 
-running = True # If the script is running
+# Get formatted printer names in a list
+def get_printers():
+  # All local printers
+  printers_tuple = win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)
+  
+  # Get formatted printer names from the tuples
+  printers = []
+  for printer in printers_tuple:
+    printer_name = printer[1]
+    
+    # Because of how the printer name is formatted, we get rid of everything
+    # after the comma in the printer name
+    comma = printer_name.find(",")
+    if comma != -1:
+      printer_name = printer_name[:comma]
+    
+    printers.append(printer_name)
+  
+  return printers
 
-ttk.Label(frame, text="Toggle Script:").grid(row=3)
-running_button = ttk.Button(frame)
-running_button.grid(row=4)
+# Default printer selection
+default_printer = "Brother MFC-L2740DW series Printer"
 
-# Convert bool to "On" or "Off" string
-def bool_to_on_off(state):
-  if state:
-    return "On"
-  return "Off"
+ttk.Label(frame, text="Printer:").grid(row=5)
 
-# Toggle running and update button text
-def toggle_running():
-  global running
-  running = not running
-  running_button.config(text=bool_to_on_off(running))
+printers = get_printers()
 
-running_button.config(text=bool_to_on_off(running))
-running_button.config(command=toggle_running)
+printer_combobox = ttk.Combobox(frame, values=printers)
+printer_combobox.grid(row=9)
+
+# Select the default printer if it's there
+if default_printer in printers:
+    printer_combobox.set(default_printer)
 
 ### Main Script ###
 
@@ -185,13 +196,6 @@ def fireban_png(file):
 
 # Get the fire ban and print it to the default printer
 def print_fireban():
-  # Don't print if script isn't running
-  # TODO: Also doesn't print when trying to print immediately
-  global running
-  if not running:
-    log("Script off, not printing.")
-    return
-
   # Save NS fire ban website as a png
   file = "fireban.png"
   err = fireban_png(file)
@@ -199,7 +203,7 @@ def print_fireban():
     return
   
   # Print PDF to printer (Windows specific)
-  printer_name = "Brother MFC-L2740DW series Printer"
+  printer_name = printers[printer_combobox.current()]
   err = win32api.ShellExecute(0, "printto", file, f'"{printer_name}"', ".", 0)
   if (err <= 32):
     log(f"Failed to print to f{printer_name}.")
