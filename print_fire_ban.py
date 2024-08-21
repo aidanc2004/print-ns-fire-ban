@@ -3,9 +3,6 @@
 # Download the current nova scotia fire ban at 2pm everyday
 # Aidan Carey, June 8th - August 20st, 2024
 
-# TODO:
-# - Use last selected printer
-
 import os
 import time
 import math
@@ -87,8 +84,10 @@ def get_printers():
   
   return printers
 
-# Default printer selection
-default_printer = "Brother MFC-L2740DW series Printer"
+# Default printer selection, read from "config.txt"
+default_printer = ""
+with open('config.txt', 'r') as config:
+  default_printer = config.read()
 
 ttk.Label(frame, text="Printer:").grid(row=5)
 
@@ -99,7 +98,11 @@ printer_combobox.grid(row=9)
 
 # Select the default printer if it's there
 if default_printer in printers:
-    printer_combobox.set(default_printer)
+  printer_combobox.set(default_printer)
+
+def update_default_printer(printer_name):
+  with open("config.txt", "w") as config:
+    config.write(printer_name)
 
 ### Main Script ###
 
@@ -204,6 +207,7 @@ def print_fireban():
   
   # Print PDF to printer (Windows specific)
   printer_name = printers[printer_combobox.current()]
+  update_default_printer(printer_name)
   err = win32api.ShellExecute(0, "printto", file, f'"{printer_name}"', ".", 0)
   if (err <= 32):
     log(f"Failed to print to f{printer_name}.")
