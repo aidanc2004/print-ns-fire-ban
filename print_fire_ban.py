@@ -48,11 +48,11 @@ def open_help():
   help_window.title("Help")
   help_window.iconbitmap("icon.ico")
   help_window.focus()
-  help_window.geometry("500x400")
+  help_window.geometry("650x500")
   help_window.resizable(False, False)
   
   # Where the help information is shown
-  help_text = scrolledtext.ScrolledText(help_window, width=60, height=24, wrap=WORD)
+  help_text = scrolledtext.ScrolledText(help_window, width=80, height=34, wrap=WORD)
   # Load help information from file
   with open("help.txt", "r") as help_file:
     help_text.insert(INSERT, help_file.read())
@@ -120,7 +120,7 @@ def log(msg):
   print(dt_msg)
   
   # Log to file
-  log_file = open("log.txt", "a")
+  log_file = open("logs.txt", "a")
   log_file.write(dt_msg + "\n")
   log_file.close()
 
