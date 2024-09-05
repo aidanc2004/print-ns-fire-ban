@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Download the current nova scotia fire ban at 2pm everyday
-# Aidan Carey, June 8th - August 20st, 2024
+# Aidan Carey, June 8th - August 31st, 2024
 
 import os
 import time
@@ -86,7 +86,7 @@ def get_printers():
 
 # Default printer selection, read from "config.txt"
 default_printer = ""
-with open('config.txt', 'r') as config:
+with open('printer.txt', 'r') as config:
   default_printer = config.read()
 
 ttk.Label(frame, text="Printer:").grid(row=5)
@@ -101,7 +101,7 @@ if default_printer in printers:
   printer_combobox.set(default_printer)
 
 def update_default_printer(printer_name):
-  with open("config.txt", "w") as config:
+  with open("printer.txt", "w") as config:
     config.write(printer_name)
 
 ### Main Script ###

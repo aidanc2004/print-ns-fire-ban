@@ -1,0 +1,51 @@
+### Fire Ban Print Script ###
+
+This is a script that automatically downloads the current fireban status in Nova Scotia as soon as it is updated everyday at 2pm.
+
+## Usage ##
+
+# Log #
+
+Logs information about when the script is started, whenever it prints the fire ban, and any errors that it catches, with the time and date. All logs are also saved to a text file in the scripts folder called "logs.txt" for if the script is closed or crashes.
+
+# Print Immediately #
+
+If the ban fails to print or you need an extra copy you can use the button labelled "Print Immediately" to print another copy at any time. It may take a minute, don't click it multiple times if it doesn't start immediately or it will print multiple times.
+
+Please note, the fireban is only updated at 2pm each day, so if you print a copy of the fire ban at 1pm on the 20th, it will be the fire ban for the 19th.
+
+# Printer #
+
+To select a printer to use you can use the drop-down list labeled "Printer" which shows all printers seen by the computer. Once a printer is selected, it is saved in "printer.txt" so that it can select it automatically the next time the script runs.
+
+
+## Run on Windows startup ##
+
+To make the script run automatically everytime you start the computer so that the fire ban prints everyday, you need to put a shortcut to it into Window's startup folder.
+
+1. Right-click the script, "print_fire_ban", and press "Create Shortcut".
+
+2. Right-click the new shortcut and rename it to "Print Fire Ban"
+
+3. Right-click the shortcut again and press "Properties".
+
+4. In the text area labeled "Target", go to the begining of the line and add "pythonw" (Without quotes).
+
+5. Go to the dropdown menu labeled "Run" and select "Minimized" so that the script hides itself on start.
+
+6. Click the button labeled "Change Icon" and then "Browse" to select the scripts icon.
+
+7. Copy the shortcut by right-clicking it and pressing "Copy".
+
+8. Press the Windows key and "r" at the same time then type "shell:startup" (Without quotes).
+
+9. Right-click and paste the shortcut into the opened folder.
+
+
+## Stop running on startup ##
+
+To stop the script from running automatically you need to delete the shortcut from Window's startup folder.
+
+1. Press the Windows key and "r" at the same time then type "shell:startup" (Without quotes).
+
+2. Right-click and press delete on "Fire Ban Script" in the opened folder.
