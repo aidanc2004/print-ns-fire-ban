@@ -36,7 +36,7 @@ logs.grid(column=1, rowspan=100, padx=(5,0))
 ### About button ###
 
 def about():
-    messagebox.showinfo("About", "Aidan Carey 2024")
+  messagebox.showinfo("About", "Aidan Carey 2024")
 ttk.Button(frame, text="About", command=about).grid(row=99)
 
 ### Help button ###
@@ -86,7 +86,8 @@ def get_printers():
 
 # Default printer selection, read from "config.txt"
 default_printer = ""
-with open('printer.txt', 'r') as config:
+with open("printer.txt", "a+") as config:
+  config.seek(0)
   default_printer = config.read()
 
 ttk.Label(frame, text="Printer:").grid(row=5)
